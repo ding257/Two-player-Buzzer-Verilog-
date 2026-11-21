@@ -2,6 +2,41 @@
 
 HIT 数字电路大作业。用 Verilog-2001 在 EGO1（Artix-7 `xc7a35tcsg324-1`）开发板上实现一个**双人反应时间抢答器**，并额外支持**单人练习**模式：主持人按键后经过一段随机延迟发出开始信号，选手按键停止计时，系统比较反应时间并计分，8 位数码管实时显示时间与成绩。
 
+## 快速开始
+
+三步从零到板子上运行。
+
+**1. 拿到工程**
+
+```bash
+git clone https://github.com/ding257/Two-player-Buzzer-Verilog-.git
+```
+
+不装 Git 也行：在仓库首页点 `Code → Download ZIP`，解压到任意目录。
+
+**2. 生成位流**
+
+用 Vivado 2024.2 打开，在底部 Tcl Console 面板里执行：
+
+```tcl
+cd D:/你的路径/Two-player-Buzzer-Verilog-
+source build.tcl
+```
+
+控制台打印 `===== ALL DONE =====` 即完成（综合 + 实现通常几分钟），位流位于 `vivado_proj/responder.runs/impl_1/top.bit`。
+
+**3. 烧到板子**
+
+EGO1 上电、USB 线连接电脑后：
+
+```tcl
+source program.tcl
+```
+
+JTAG 在线下载，断电即丢，适合调试。要断电保持就改跑 `source program_flash_ok.tcl`（固化到 SPI Flash，需先把 JP2 拨到 JTAG 并断电重启）。
+
+全程无需手动新建工程、Add Sources 或修改路径 —— 脚本会自己建工程、加入源文件与约束、指定顶层、跑完综合与实现。
+
 ## 功能
 
 **双人抢答模式（默认，D6 指示灯亮）**

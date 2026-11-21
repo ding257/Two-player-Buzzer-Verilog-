@@ -7,11 +7,28 @@
 #       本脚本手动灌入该位流，绕过 Vivado 自动查找失败的问题。
 #
 # 用法：vivado.bat -mode batch -source program_flash_ok.tcl
+# 路径全部相对于本脚本所在目录，工程可整体移动
 # ============================================================
-set ROOT   "C:/Users/86158/Desktop/Recorder_Machine"
+set ROOT   [file dirname [file normalize [info script]]]
 set BIT    "$ROOT/vivado_proj/responder.runs/impl_1/top.bit"
 set MCS    "$ROOT/top.mcs"
-set BRIDGE "D:/vivado/Vivado/2024.2/data/xicom/cfgmem/bitfile/spi_xc7a35t_pullnone.bit"
+
+if {![file exists $BIT]} {
+    puts "ERROR: 找不到位流 $BIT"
+    puts "       请先运行：vivado.bat -mode batch -source build.tcl"
+    exit 1
+}
+
+# 桥接位流随 Vivado 安装，用 XILINX_VIVADO 环境变量定位
+set BRIDGE ""
+if {[info exists ::env(XILINX_VIVADO)]} {
+    set BRIDGE [file join $::env(XILINX_VIVADO) data xicom cfgmem bitfile spi_xc7a35t_pullnone.bit]
+}
+if {![file exists $BRIDGE]} {
+    puts "ERROR: 找不到桥接位流：$BRIDGE"
+    puts "       请手动把 BRIDGE 设为 <Vivado安装目录>/data/xicom/cfgmem/bitfile/spi_xc7a35t_pullnone.bit"
+    exit 1
+}
 
 # 1. 由 bit 生成 mcs（8MB = 64Mbit，SPIx4）
 write_cfgmem -force -format mcs -interface SPIx4 -size 8 -loadbit "up 0x0 $BIT" -file $MCS

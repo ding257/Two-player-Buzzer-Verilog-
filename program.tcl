@@ -1,5 +1,14 @@
 # 下载 top.bit 到 EGO1 板子（JTAG 在线烧录，断电丢失）
-set BIT "C:/Users/86158/Desktop/Recorder_Machine/vivado_proj/responder.runs/impl_1/top.bit"
+# 用法：vivado.bat -mode batch -source program.tcl
+# 路径全部相对于本脚本所在目录，工程可整体移动
+set ROOT [file dirname [file normalize [info script]]]
+set BIT  "$ROOT/vivado_proj/responder.runs/impl_1/top.bit"
+
+if {![file exists $BIT]} {
+    puts "ERROR: 找不到位流 $BIT"
+    puts "       请先运行：vivado.bat -mode batch -source build.tcl"
+    exit 1
+}
 
 open_hw_manager
 connect_hw_server -url localhost:3121

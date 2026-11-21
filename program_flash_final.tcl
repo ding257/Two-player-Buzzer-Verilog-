@@ -2,10 +2,18 @@
 # EGO1 SPI Flash 固化脚本（最终版）
 # 前提：JP2 拨到 JTAG 位置 + 断电重启（FPGA 处于未配置态）
 #       这样 JTAG 才能接管配置引擎去操作 SPI Flash
+# 用法：vivado.bat -mode batch -source program_flash_final.tcl
+# 路径全部相对于本脚本所在目录，工程可整体移动
 # ============================================================
-set ROOT "C:/Users/86158/Desktop/Recorder_Machine"
+set ROOT [file dirname [file normalize [info script]]]
 set BIT  "$ROOT/vivado_proj/responder.runs/impl_1/top.bit"
 set MCS  "$ROOT/top.mcs"
+
+if {![file exists $BIT]} {
+    puts "ERROR: 找不到位流 $BIT"
+    puts "       请先运行：vivado.bat -mode batch -source build.tcl"
+    exit 1
+}
 
 # 1. 生成 mcs（大小 8MB = 64Mbit，SPIx4 接口）
 write_cfgmem -force -format mcs -interface SPIx4 -size 8 -loadbit "up 0x0 $BIT" -file $MCS

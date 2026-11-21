@@ -105,12 +105,14 @@ vivado.bat -mode batch -source program.tcl
 vivado.bat -mode batch -source program_flash_ok.tcl
 ```
 
-`build.tcl` 以脚本自身所在目录为根目录，工程**自包含、可整体移动**，clone 到任何位置都能直接跑。
+`build.tcl` 与所有烧录脚本都以**脚本自身所在目录**为根目录（`[info script]`），工程自包含、可整体移动，clone 到任何位置都能直接跑。
 
 Flash 固化流程：生成 8 MB（64 Mbit）SPIx4 的 `.mcs` → 连接 `localhost:3121` → 给 FPGA 灌入桥接位流 `spi_xc7a35t_pullnone.bit` → 擦除、编程、校验 `n25q64-3.3v-spi-x1_x2_x4`。
 
 ## 注意事项
 
-- `program.tcl`、`program_flash_ok.tcl`、`program_flash_final.tcl` 里写死了作者的绝对路径（`C:/Users/.../Recorder_Machine` 和 `D:/vivado/...`），换机器运行前需要改成自己的路径。
+- 所有 tcl 脚本都**自带路径**：以脚本所在目录为工程根目录（`[info script]`），clone 到任何位置都能直接跑，无需改路径。
+- 桥接位流 `spi_xc7a35t_pullnone.bit` 通过 Vivado 自带的环境变量 `XILINX_VIVADO` 定位，不绑定具体安装盘符；若环境变量缺失，脚本会提示手动指定。
+- 仓库不含位流，烧录前必须先跑一次 `build.tcl` 生成 `vivado_proj/.../top.bit`，否则脚本会报「找不到位流」并退出。
 - 仓库只提交源码、约束与脚本。`vivado_proj/`、`*.bit`、`*.mcs`、`*.svf` 等中间产物和位流已写入 `.gitignore`：位流可由 `build.tcl` 重新生成，`top.svf` 单文件就有 50 MB，不适合进仓库。
 - Flash 固化需要 `JP2` 拨到 JTAG 并断电重启，让 JTAG 能接管配置引擎操作 SPI Flash。

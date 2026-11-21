@@ -1,8 +1,16 @@
 # 固化脚本：把 bit 转成 .mcs 并烧录到 EGO1 板载 SPI Flash N25Q64（断电不丢）
 # 前提：bit 已带 SPI_BUSWIDTH=4（x4/QSPI）配置
-set ROOT "C:/Users/86158/Desktop/Recorder_Machine"
+# 用法：vivado.bat -mode batch -source program_flash.tcl
+# 路径全部相对于本脚本所在目录，工程可整体移动
+set ROOT [file dirname [file normalize [info script]]]
 set BIT  "$ROOT/vivado_proj/responder.runs/impl_1/top.bit"
 set MCS  "$ROOT/top.mcs"
+
+if {![file exists $BIT]} {
+    puts "ERROR: 找不到位流 $BIT"
+    puts "       请先运行：vivado.bat -mode batch -source build.tcl"
+    exit 1
+}
 
 # 1. 生成 mcs（x4 接口，N25Q64 = 64Mbit = 8MB，按 PPT 第59页：禁用位交换+校验和）
 write_cfgmem -force -format mcs -interface SPIx4 -size 8 -checksum -disablebitswap -loadbit "up 0x0 $BIT" -file $MCS
